@@ -52,7 +52,7 @@ Solution for [Day $dayShortName](https://adventofcode.com/2024/day/$dayShortName
   $unitDir = Join-Path $dayDir "$($dayName).UnitTests"
   Create-Directory $unitDir
   & dotnet new classlib -o $unitDir -v m
-  Move-Item (Join-Path $unitDir "Class1.cs") (Join-Path $appDir "$($dayName)Tests.cs")
+  Move-Item (Join-Path $unitDir "Class1.cs") (Join-Path $unitDir "$($dayName)Tests.cs")
   & dotnet sln add $unitDir
   $unitPackages = @(
     "Microsoft.NET.Test.Sdk",
