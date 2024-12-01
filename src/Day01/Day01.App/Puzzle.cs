@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Advent.Util;
 
 namespace Day01;
@@ -8,12 +9,19 @@ public sealed class Puzzle
     {
         var left = new List<int>();
         var right = new List<int>();
-        using var reader = new StringReader(input);
-        while (reader.ReadLine() is string line)
+        var e = input.SplitLines();
+        Span<Range> rangeSpan = stackalloc Range[2];
+        while (e.MoveNext())
         {
-            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            left.InsertSorted(int.Parse(parts[0]));
-            right.InsertSorted(int.Parse(parts[1]));
+            var current = e.Current;
+            var count = current.Split(rangeSpan, [' '], StringSplitOptions.RemoveEmptyEntries);
+            if (count != 2)
+            {
+                throw new InvalidOperationException();
+            }
+
+            left.InsertSorted(int.Parse(current[rangeSpan[0]]));
+            right.InsertSorted(int.Parse(current[rangeSpan[1]]));
         }
         return (left, right);
     }

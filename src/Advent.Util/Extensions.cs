@@ -11,4 +11,10 @@ public static class Extensions
         }
         list.Insert(index, value);
     }
+
+    public static LineSplitEnumerator SplitLines(this string input) =>
+        SplitLines(input.AsSpan());
+
+    public static LineSplitEnumerator SplitLines(this ReadOnlySpan<char> input) =>
+        new LineSplitEnumerator(input);
 }
