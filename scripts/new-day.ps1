@@ -44,15 +44,40 @@ Solution for [Day $dayShortName](https://adventofcode.com/2024/day/$dayShortName
   Create-Directory $appDir
   & dotnet new console -o $appDir -v m
   & dotnet sln add $appDir
-  Move-Item (Join-Path $appDir "Program.cs") (Join-Path $appDir "$($dayName).cs")
   & dotnet add $appDir reference (Join-Path $rootDir "src\Advent.Util")
+
+  New-Item (Join-Path $appDir "Puzzle.cs") -ItemType File -Value @"
+using Advent.Util;
+
+namespace $dayName;
+
+public sealed class Puzzle
+{
+
+}
+
+"@ | Out-Null
+
+  New-Item (Join-Path $appDir "Input.cs") -ItemType File -Value @"
+using Advent.Util;
+
+namespace $dayName;
+
+public sealed class Input
+{
+    public const string Test = "";
+
+    public const string Real = "";
+}
+
+"@ | Out-Null
 
   # Create the unit test project
   Write-Host "Creating unit test project"
   $unitDir = Join-Path $dayDir "$($dayName).UnitTests"
   Create-Directory $unitDir
   & dotnet new classlib -o $unitDir -v m
-  Move-Item (Join-Path $unitDir "Class1.cs") (Join-Path $unitDir "$($dayName)Tests.cs")
+  Move-Item (Join-Path $unitDir "Class1.cs") (Join-Path $unitDir "PuzzleTests.cs")
   & dotnet sln add $unitDir
   $unitPackages = @(
     "Microsoft.NET.Test.Sdk",
