@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using Advent.Util;
 
 namespace Day02;
 
 public sealed class Puzzle
 {
-    public static int[] ParseLevel(ReadOnlySpan<char> input)
+    public static int[] ParseReadings(ReadOnlySpan<char> input)
     {
         var count = input.CountChars(' ') + 1;
         var level = new int[count];
@@ -19,14 +21,14 @@ public sealed class Puzzle
         return level;
     }
 
-    public static int CountSafe(string input)
+    public static int CountSafe(string input, bool dampner = false)
     {
         var e = input.SplitLines();
         var count = 0;
         while (e.MoveNext())
         {
-            var level = ParseLevel(e.Current);
-            if (IsLevelSafe(level))
+            var readings = ParseReadings(e.Current);
+            if (AreReadingsSafe(readings, dampner))
             {
                 count++;
             }
@@ -34,39 +36,62 @@ public sealed class Puzzle
         return count;
     }
 
-    public static bool IsLevelSafe(ReadOnlySpan<int> level)
+    public static bool AreReadingsSafe(ReadOnlySpan<int> readings, bool dampner)
     {
-        var first = level[0];
-        var second = level[1];
-        if (first == second)
+        if (Core(readings, dampner))
         {
-            return false;
+            return true;
         }
 
-        var increasing = first < second;
-        for (int i = 1; i < level.Length; i++)
+        if (dampner && 
+            readings.Length > 2 &&
+            Core(readings[1..], dampner: false))
         {
-            var prev = level[i - 1];
-            var current = level[i];
-            var diff = current - prev;
-            if (Math.Abs(diff) is < 1 or > 3)
+            return true;
+        }
+
+        return false;
+
+        static bool Core(ReadOnlySpan<int> readings, bool dampner)
+        {
+            var first = readings[0];
+            var second = readings[1];
+            if (first == second)
             {
                 return false;
             }
 
-            var c = (increasing, prev < current) switch 
+            var increasing = first < second;
+            var prev = first;
+            var removedReading = false;
+            for (int i = 1; i < readings.Length; i++)
             {
-                (true, true) => true,
-                (false, false) => true,
-                _ => false
-            };
+                var current = readings[i];
+                var diffSafe  = Math.Abs(current - prev) is > 0 and < 4;
+                var incSafe = (increasing, prev < current) switch 
+                {
+                    (true, true) => true,
+                    (false, false) => true,
+                    _ => false
+                };
 
-            if (!c)
-            {
-                return false;
+                if (!diffSafe || !incSafe)
+                {
+                    if (!dampner || removedReading)
+                    {
+                        return false;
+                    }
+
+                    removedReading = true;
+                }
+                else
+                {
+                    prev = current;
+                }
+
             }
-        }
 
-        return true;
+            return true;
+        }
     }
 }
