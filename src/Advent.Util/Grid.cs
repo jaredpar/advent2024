@@ -124,4 +124,55 @@ public sealed class Grid<T>
 
         return grid;
     }
+
+    /// <summary>
+    /// Parse out a grid where the delimeter between the columns is a space.
+    /// </summary>
+    public static Grid<T> ParseDelimeted(string input, char delimeter, Func<ReadOnlySpan<char>, T> func)
+    {
+        var e = input.SplitLines();
+        if (!e.MoveNext())
+        {
+            throw new InvalidOperationException();
+        }
+
+        var lineCount = input.CountLines();
+        var first = e.Current;
+        var columnCount = CountDelimeters(first, delimeter) + 1;
+        var grid = new Grid<T>(lineCount, columnCount);
+        var r = 0;
+        Span<Range> rangeSpan = stackalloc Range[columnCount];
+        do
+        {
+            var current = e.Current;
+            var currentCount = current.Split(rangeSpan, delimeter, StringSplitOptions.RemoveEmptyEntries);
+            if (currentCount != grid.Columns)
+            {
+                throw new InvalidOperationException();
+            }
+
+            for (int c = 0; c < grid.Columns; c++)
+            {
+                grid.GetValue(r, c) = func(current[rangeSpan[c]]);
+            }
+
+            r++;
+        } while (e.MoveNext());
+
+        return grid;
+
+        static int CountDelimeters(ReadOnlySpan<char> line, char delimeter)
+        {
+            var count = 0;
+            foreach (var c in line)
+            {
+                if (c == delimeter)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+    }
 }

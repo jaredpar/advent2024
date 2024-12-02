@@ -12,6 +12,25 @@ public static class Extensions
         list.Insert(index, value);
     }
 
+    public static int CountChars(this ReadOnlySpan<char> input, char value)
+    {
+        var count = 0;
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (input[i] == value)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static int CountLines(this string input) =>
+        CountLines(input.AsSpan());
+
+    public static int CountLines(this ReadOnlySpan<char> input) =>
+        LineSplitEnumerator.CountLines(input);
+
     public static LineSplitEnumerator SplitLines(this string input) =>
         SplitLines(input.AsSpan());
 

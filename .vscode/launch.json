@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "dotnet: build",
-            "program": "${workspaceFolder}/artifacts/bin/Day01.App/debug/Day01.App.dll",
+            "program": "${workspaceFolder}/artifacts/bin/Day02.App/debug/Day02.App.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Day01/Day01.App",
+            "cwd": "${workspaceFolder}/src/Day02/Day02.App",
             "stopAtEntry": false,
             "console": "internalConsole",
             "logging": {
