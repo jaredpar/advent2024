@@ -54,26 +54,14 @@ public sealed class Puzzle
 
         static bool Core(ReadOnlySpan<int> readings, bool dampner)
         {
-            var first = readings[0];
-            var second = readings[1];
-            if (first == second)
-            {
-                return false;
-            }
-
-            var increasing = first < second;
-            var prev = first;
+            var prev = readings[0];
+            var increasing = prev < readings[1];
             var removedReading = false;
             for (int i = 1; i < readings.Length; i++)
             {
                 var current = readings[i];
-                var diffSafe  = Math.Abs(current - prev) is > 0 and < 4;
-                var incSafe = (increasing, prev < current) switch 
-                {
-                    (true, true) => true,
-                    (false, false) => true,
-                    _ => false
-                };
+                var diffSafe = Math.Abs(current - prev) is > 0 and < 4;
+                var incSafe = increasing == prev < current;
 
                 if (!diffSafe || !incSafe)
                 {

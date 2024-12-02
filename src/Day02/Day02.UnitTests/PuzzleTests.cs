@@ -30,7 +30,8 @@ public class PuzzleTests
     [InlineData("10 16 13 15 16 19", true, true)]
     [InlineData("50 52 50 53 56", true, true)]
     [InlineData("48 46 47 49 51 54 56", true, true)]
-    [InlineData("79 76 74 73 70 73", true, false)]
+    [InlineData("79 76 74 73 70 73", true, true)]
+    [InlineData("1 2 3 2 4", true, true)]
     public void AreReadingsSafe2(string input, bool dampner, bool expected)
     {
         var readings = Puzzle.ParseReadings(input);
@@ -52,6 +53,6 @@ public class PuzzleTests
     public void Part2()
     {
         Assert.Equal(4, Puzzle.CountSafe(Input.Test, dampner: true));
-        Assert.Equal(321, Puzzle.CountSafe(Input.Real, dampner: true));
+        Assert.Equal(383, Puzzle.CountSafe(Input.Real, dampner: true));
     }
 }
