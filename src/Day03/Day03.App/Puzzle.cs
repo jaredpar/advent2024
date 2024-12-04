@@ -5,34 +5,7 @@ namespace Day03;
 
 public sealed partial class Puzzle
 {
-    public static int RunProgram(ReadOnlySpan<char> input)
-    {
-        var sum = 0;
-        while (TryParseMul(ref input) is int mul)
-        {
-            sum += mul;
-        }
-        return sum;
-    } 
-
-    public static int? TryParseMul(ref ReadOnlySpan<char> input)
-    {
-        var match = MulRegex.Match(input.ToString());
-        if (!match.Success)
-        {
-            return null;
-        }
-
-        input = input.Slice(match.Index + match.Length);
-        var left = int.Parse(match.Groups[1].Value);
-        var right = int.Parse(match.Groups[2].Value);
-        return left * right;
-    }
-
-    [GeneratedRegexAttribute(@"mul\((\d{1,3}),(\d{1,3})\)")]
-    public static partial Regex MulRegex { get; }
-
-    public static int RunProgramBetter(ReadOnlySpan<char> input)
+    public static int RunProgram(ReadOnlySpan<char> input, bool allowControls)
     {
         var sum = 0;
         var enable = true;
@@ -64,12 +37,12 @@ public sealed partial class Puzzle
                     input = input[1..];
                 }
             }
-            else if (instructionSpan is "do" && current[index + 1] is ')')
+            else if (instructionSpan is "do" && current[index + 1] is ')' && allowControls)
             {
                 enable = true;
                 input = input[(index + 1)..];
             }
-            else if (instructionSpan is "don't" && current[index + 1] is ')')
+            else if (instructionSpan is "don't" && current[index + 1] is ')' && allowControls)
             {
                 enable = false;
                 input = input[(index + 1)..];
