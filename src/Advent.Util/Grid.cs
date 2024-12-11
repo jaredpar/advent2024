@@ -1,4 +1,8 @@
-﻿namespace Advent.Util;
+﻿using System.Data.Common;
+using System.Dynamic;
+using System.Security.AccessControl;
+
+namespace Advent.Util;
 
 public readonly struct GridSpan<T>
 {
@@ -42,8 +46,22 @@ public readonly struct GridSpan<T>
     public override string ToString() => $"{nameof(GridSpan<T>)}: {Row}, {Column}, {Length}";
 }
 
+public enum GridDirection
+{
+    Right,
+    Down,
+    Left,
+    Up,
+    DiagonalRightDown,
+    DiagonalLeftDown,
+    DiagonalRightUp,
+    DiagonalLeftUp
+}
+
 public sealed class Grid<T>
 {
+    private delegate void IncrementFunc(ref int row, ref int column);
+
     private readonly T[] _items;
     private readonly int _columns;
 
@@ -52,9 +70,16 @@ public sealed class Grid<T>
 
     public Grid(int rows, int columns)
     {
+        if (rows <= 0 || columns <= 0)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
         _items = new T[rows * columns];
         _columns = columns;
     }
+
+    public Enumerator GetEnumerator() => new(this);
 
     public IEnumerable<(int Row, int Column)> GetAdjacentIndexes(int row, int column)
     {
@@ -91,6 +116,40 @@ public sealed class Grid<T>
 
     public GridSpan<T> GetGridSpan(int row) => new(this, row, 0, Columns);
 
+    /// <summary>
+    /// Get the values at the specified row column in the direction and put them into 
+    /// the span. Length is dictated by the length of the span.
+    /// </summary>
+    public bool TryGetSpan(int row, int column, GridDirection direction, Span<T> span)
+    {
+        IncrementFunc func = direction switch 
+        {
+            // fill out the switch later
+            GridDirection.Right => static (ref int r, ref int c) => c++,
+            GridDirection.Down => static (ref int r, ref int c) => r++,
+            GridDirection.Left => static (ref int r, ref int c) => c--,
+            GridDirection.Up => static (ref int r, ref int c) => r--,
+            GridDirection.DiagonalRightDown => static (ref int r, ref int c) => { r++; c++; },
+            GridDirection.DiagonalLeftDown => static (ref int r, ref int c) => { r++; c--; },
+            GridDirection.DiagonalRightUp => static (ref int r, ref int c) => { r--; c++; },
+            GridDirection.DiagonalLeftUp => static (ref int r, ref int c) => { r--; c--; },
+            _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+        };
+
+        for (int i = 0; i < span.Length; i++)
+        {
+            if (row >= Rows || column >= Columns || row < 0 || column < 0)
+            {
+                return false;
+            }
+
+            span[i] = GetValue(row, column);
+            func(ref row, ref column);
+        };
+
+        return true;
+    }
+
     public IEnumerable<GridSpan<T>> GetGridSpans()
     {
         for (int r = 0; r < Rows; r++)
@@ -110,6 +169,36 @@ public sealed class Grid<T>
         }
     }
 
+    public struct Enumerator(Grid<T> grid)
+    {
+        public Grid<T> Grid { get; } = grid;
+        public int Row { get; private set; } = -1;
+        public int Column { get; private set; }
+        public T Current => Grid.GetValue(Row, Column);
+
+        public bool MoveNext()
+        {
+            if (Row == -1)
+            {
+                Row = 0;
+            }
+            else
+            {
+                Column++;
+                if (Column >= Grid.Columns)
+                {
+                    Row++;
+                    Column = 0;
+                }
+            }
+
+            return Row < Grid.Rows;
+        }
+    }
+}
+
+public static class Grid
+{
     public static Grid<char> Parse(string[] lines)
     {
         var grid = new Grid<char>(lines.Length, lines[0].Length);
@@ -126,9 +215,38 @@ public sealed class Grid<T>
     }
 
     /// <summary>
+    /// Parse out the input by lines with each character being an element in the 
+    /// <see cref="Grid<char>"/> 
+    /// </summary>
+    public static Grid<char> Parse(string input)
+    {
+        var e = input.SplitLines();
+        if (!e.MoveNext())
+        {
+            throw new InvalidOperationException();
+        }
+
+        var rows = input.CountLines();
+        var columns = e.Current.Length;
+        var grid = new Grid<char>(rows, columns);
+        var r = 0;
+        do
+        {
+            var current = e.Current;
+            for (int c = 0; c < current.Length; c++)
+            {
+                grid.GetValue(r, c) = current[c];
+            }
+            r++;
+        } while (e.MoveNext());
+
+        return grid;
+    }
+
+    /// <summary>
     /// Parse out a grid where the delimeter between the columns is a space.
     /// </summary>
-    public static Grid<T> ParseDelimeted(string input, char delimeter, Func<ReadOnlySpan<char>, T> func)
+    public static Grid<T> ParseDelimeted<T>(string input, char delimeter, Func<ReadOnlySpan<char>, T> func)
     {
         var e = input.SplitLines();
         if (!e.MoveNext())

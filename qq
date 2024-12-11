@@ -1,0 +1,59 @@
+[33mcommit 888d4104d3d0854aee55fa65d4619f3245c5fb3a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Mon Dec 2 07:17:50 2024 -0800
+
+    more
+
+[33mcommit 813ef65c8f819ea81e7905425dafdfdeee9381b9[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Mon Dec 2 07:06:55 2024 -0800
+
+    Not done yet
+
+[33mcommit cb24de141139b4970c7d08d0cf1a6a72f137513b[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Mon Dec 2 06:14:54 2024 -0800
+
+    Day 02 Part 1
+
+[33mcommit 6ba7a2bbd3737a7a8cde681dd74afb15f24af292[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 12:08:29 2024 -0800
+
+    Better performance
+
+[33mcommit 7eb39f8d3f1cea590b5b6a40cd509fba5bf2d4ac[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 10:10:10 2024 -0800
+
+    Better infrastructure
+
+[33mcommit 96f1890ed87f11183b0f37404d655bd19030661e[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 10:00:28 2024 -0800
+
+    day 01 completed
+
+[33mcommit 7016b6a3389a0956d54d75a0f4999ad4b13af2f5[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 09:28:07 2024 -0800
+
+    Getting the infra for every day setup
+
+[33mcommit 134d6d21ceadb0b47c5063cc7adb4415b18f7b3f[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 09:00:01 2024 -0800
+
+    Getting the directory setup
+
+[33mcommit 17854f9d705787cca1830903d11ec138f1d906a3[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 08:39:18 2024 -0800
+
+    Basic setup
+
+[33mcommit a599654915781127ee6ab2b643641d6ba0ce1ea6[m
+Author: Jared Parsons <jared@paranoidcoding.org>
+Date:   Sun Dec 1 08:35:43 2024 -0800
+
+    Initial commit

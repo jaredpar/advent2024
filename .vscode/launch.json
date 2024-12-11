@@ -5,13 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Day03.App",
+            "name": "Launch Day04.App",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "dotnet: build",
-            "program": "${workspaceFolder}/artifacts/bin/Day03.App/debug/Day03.App.dll",
+            "program": "${workspaceFolder}/artifacts/bin/Day04.App/debug/Day04.App.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Day03/Day03.App",
+            "cwd": "${workspaceFolder}/src/Day04/Day04.App",
             "stopAtEntry": false,
             "console": "internalConsole",
             "logging": {

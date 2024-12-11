@@ -1,7 +1,7 @@
 ﻿using Advent.Util;
 using Xunit;
 
-namespace Advent.Unit.UnitTests;
+namespace Advent.Util.UnitTests;
 
 public sealed class LineSplitEnumeratorTests
 {
