@@ -169,7 +169,7 @@ public sealed class Grid<T>
         }
     }
 
-    public struct Enumerator(Grid<T> grid)
+    public struct Enumerator(Grid<T> grid) : IDisposable
     {
         public Grid<T> Grid { get; } = grid;
         public int Row { get; private set; } = -1;
@@ -194,6 +194,8 @@ public sealed class Grid<T>
 
             return Row < Grid.Rows;
         }
+
+        public void Dispose() { }
     }
 }
 

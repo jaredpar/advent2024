@@ -24,6 +24,38 @@ public sealed class Puzzle
         return count;
     }
 
+    public static int CountXShapeMas(string input)
+    {
+        var grid = Grid.Parse(input);
+        var buffer = ArrayPool<char>.Shared.Rent(3);
+        using var e = grid.GetEnumerator();
+        var count = 0;
+        while (e.MoveNext())
+        {
+            if (e.Current is 'A' &&
+                IsXmas(e.Row - 1, e.Column - 1, GridDirection.DiagonalRightDown) &&
+                IsXmas(e.Row + 1, e.Column - 1, GridDirection.DiagonalRightUp))
+            {
+                count++;
+            }
+        }
+
+        ArrayPool<char>.Shared.Return(buffer);
+        return count;
+
+        bool IsXmas(int row, int column, GridDirection direction)
+        {
+            var span = buffer.AsSpan(0, 3);
+            return 
+                row >= 0 &&
+                row < grid.Rows &&
+                column >= 0 &&
+                column < grid.Columns &&
+                grid.TryGetSpan(row, column, direction, span) &&
+                (span is "MAS" || span is "SAM");
+        }
+    }
+
     public struct WordEnumerator(Grid<char> grid, int wordLength) : IDisposable
     {
         private int _wordLength = wordLength;

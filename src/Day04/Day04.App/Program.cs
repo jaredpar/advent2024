@@ -4,3 +4,4 @@
 using Day04;
 
 Console.WriteLine(Puzzle.CountXmas(Input.Real));
+Console.WriteLine(Puzzle.CountXShapeMas(Input.Real));

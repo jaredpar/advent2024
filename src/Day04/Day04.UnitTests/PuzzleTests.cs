@@ -12,4 +12,9 @@ public class PuzzleTests
         Assert.Equal(2545, Puzzle.CountXmas(Input.Test));
     }
 
+    [Fact]
+    public void Part2()
+    {
+        Assert.Equal(9, Puzzle.CountXShapeMas(Input.Test));
+    }
 }
