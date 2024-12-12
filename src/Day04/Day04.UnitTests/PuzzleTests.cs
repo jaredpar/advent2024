@@ -9,7 +9,7 @@ public class PuzzleTests
     {
         Assert.Equal(4, Puzzle.CountXmas(Input.Simple));
         Assert.Equal(18, Puzzle.CountXmas(Input.Test));
-        Assert.Equal(2545, Puzzle.CountXmas(Input.Test));
+        Assert.Equal(2545, Puzzle.CountXmas(Input.Real));
     }
 
     [Fact]

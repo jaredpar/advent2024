@@ -58,6 +58,26 @@ public enum GridDirection
     DiagonalLeftUp
 }
 
+public readonly struct GridPosition(int row, int column)
+{
+    public int Row { get; } = row;
+    public int Column { get; } = column;
+
+    public GridPosition Move(GridDirection direction) =>
+        direction switch 
+        {
+            GridDirection.Right => new(Row, Column + 1),
+            GridDirection.Down => new(Row + 1, Column),
+            GridDirection.Left => new(Row, Column - 1),
+            GridDirection.Up => new(Row - 1, Column),
+            GridDirection.DiagonalRightDown => new(Row + 1, Column + 1),
+            GridDirection.DiagonalLeftDown => new(Row + 1, Column - 1),
+            GridDirection.DiagonalRightUp => new(Row - 1, Column + 1),
+            GridDirection.DiagonalLeftUp => new(Row - 1, Column - 1),
+            _ => throw new InvalidOperationException()
+        };
+}
+
 public sealed class Grid<T>
 {
     private delegate void IncrementFunc(ref int row, ref int column);
@@ -80,6 +100,12 @@ public sealed class Grid<T>
     }
 
     public Enumerator GetEnumerator() => new(this);
+
+    public bool IsValid(GridPosition position) =>
+        position.Row >= 0 &&
+        position.Row < Rows &&
+        position.Column >= 0 &&
+        position.Column < Columns;
 
     public IEnumerable<(int Row, int Column)> GetAdjacentIndexes(int row, int column)
     {
@@ -108,6 +134,8 @@ public sealed class Grid<T>
             yield return (row, column + 1);
     }
 
+    public ref T GetValue(GridPosition position) => ref GetValue(position.Row, position.Column);
+
     public ref T GetValue(int row, int column) => ref _items[(row * _columns) + column];
 
     public Memory<T> GetRowMemory(int row) => _items.AsMemory(row * _columns, _columns);
@@ -122,29 +150,16 @@ public sealed class Grid<T>
     /// </summary>
     public bool TryGetSpan(int row, int column, GridDirection direction, Span<T> span)
     {
-        IncrementFunc func = direction switch 
-        {
-            // fill out the switch later
-            GridDirection.Right => static (ref int r, ref int c) => c++,
-            GridDirection.Down => static (ref int r, ref int c) => r++,
-            GridDirection.Left => static (ref int r, ref int c) => c--,
-            GridDirection.Up => static (ref int r, ref int c) => r--,
-            GridDirection.DiagonalRightDown => static (ref int r, ref int c) => { r++; c++; },
-            GridDirection.DiagonalLeftDown => static (ref int r, ref int c) => { r++; c--; },
-            GridDirection.DiagonalRightUp => static (ref int r, ref int c) => { r--; c++; },
-            GridDirection.DiagonalLeftUp => static (ref int r, ref int c) => { r--; c--; },
-            _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
-        };
-
+        var position = new GridPosition(row, column);
         for (int i = 0; i < span.Length; i++)
         {
-            if (row >= Rows || column >= Columns || row < 0 || column < 0)
+            if (!IsValid(position))
             {
                 return false;
             }
 
-            span[i] = GetValue(row, column);
-            func(ref row, ref column);
+            span[i] = GetValue(position);
+            position = position.Move(direction);
         };
 
         return true;
