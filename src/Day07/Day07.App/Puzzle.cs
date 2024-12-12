@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using Advent.Util;
 
 using Equation = (long Test, System.Collections.Generic.List<long> Values);
@@ -42,38 +43,46 @@ public sealed class Puzzle
         return equations;
     }
 
-    public static long SumGoodEquations(string input)
+    public static long SumGoodEquations(string input, bool useConcat = false)
     {
         var equations = Parse(input);
         return equations
-            .Where(CheckEquation)
+            .Where(x => CheckEquation(x, useConcat))
             .Sum(x => x.Test);
     }
 
-    public static bool CheckEquation(Equation equation)
+    public static bool CheckEquation(Equation equation, bool useConcat)
     {
-        return CheckCore(
-            equation.Test,
-            equation.Values[0],
-            CollectionsMarshal.AsSpan(equation.Values)[1..]);
+        var values = CollectionsMarshal.AsSpan(equation.Values);
+        return 
+            values.Length > 0 &&
+            CheckCore(values[0], values[1..]);
 
-        bool CheckCore(long test, long total, Span<long> values)
+        bool CheckCore(long total, Span<long> values)
         {
             if (values.Length == 0)
             {
-                return test == total;
+                return total == equation.Test;
             }
 
-            if (total > test)
-            {
-                return false;
-            }
-
-            var value = values[0];
+            var next = values[0];
             values = values[1..];
-            return 
-                CheckCore(test, total + value, values) ||
-                CheckCore(test, total * value, values);
+            return
+                CheckCore(total + next, values) ||
+                CheckCore(total * next, values) ||
+                (useConcat && CheckCore(Concat(total, next), values));
+        }
+    }
+
+    public static long Concat(long left, long right)
+    {
+        var shift = (long)Math.Pow(10, CountDigits(right));
+        return (left * shift) + right;
+
+        static long CountDigits(long number)
+        {
+            if (number == 0) return 1;
+            return (int)Math.Floor(Math.Log10(Math.Abs(number)) + 1);
         }
     }
 }
