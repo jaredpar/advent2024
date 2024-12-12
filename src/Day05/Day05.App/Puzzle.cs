@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Advent.Util;
 using RulesMap = System.Collections.Generic.SortedDictionary<int, System.Collections.Generic.List<int>>;
 
@@ -78,7 +79,7 @@ public sealed class Puzzle
             for (int k = i + 1; k < updates.Count; k++)
             {
                 var num = updates[k];
-                if (IsOrdered(map, left, num) != true)
+                if (IsLeftBeforeRight(map, left, num) != true)
                 {
                     return false;
                 }
@@ -104,7 +105,62 @@ public sealed class Puzzle
         return sum;
     }
 
-    private static bool? IsOrdered(RulesMap map, int left, int right)
+    public static int SumUnorderedPageMiddles(string input)
+    {
+        var (map, updates) = Parse(input);
+        var sum = 0;
+        foreach (var update in updates)
+        {
+            if (!IsOrdered(map, update))
+            {
+                SortUpdate(map, update);
+                var middle = update.Count / 2;
+                sum += update[middle];
+            }
+        }
+
+        return sum;
+    }
+
+    public static void SortUpdate(RulesMap map, List<int> update)
+    {
+        Span<int> span = CollectionsMarshal.AsSpan(update);
+        while (span.Length > 1)
+        {
+            var smallestIndex = 0;
+            var currentIndex = 1;
+            while (currentIndex != smallestIndex)
+            {
+                if (!IsLeftBeforeRight(map, span[smallestIndex], span[currentIndex]))
+                {
+                    smallestIndex = currentIndex;
+                }
+
+                nextIndex(ref currentIndex, span.Length);
+            }
+
+            Swap(span, 0, smallestIndex);
+            span = span[1..];
+        }
+
+        void nextIndex(ref int index, int length)
+        {
+            index++;
+            if (index == length)
+            {
+                index = 0;
+            }
+        }
+
+        static void Swap(Span<int> span, int x, int y)
+        {
+            var value = span[x];
+            span[x] = span[y];
+            span[y] = value;
+        }
+    } 
+
+    private static bool IsLeftBeforeRight(RulesMap map, int left, int right)
     {
         if (!map.TryGetValue(left, out var list))
         {
@@ -112,15 +168,5 @@ public sealed class Puzzle
         }
 
         return list.BinarySearch(right) >= 0;
-    }
-
-    private static bool IsAfter(RulesMap map, int num, int afterTest)
-    {
-        if (!map.TryGetValue(num, out var list))
-        {
-            return false;
-        }
-
-        return list.BinarySearch(afterTest) >= 0;
     }
 }
