@@ -90,6 +90,51 @@ public sealed class Input
     & dotnet add $unitDir package $p | Out-Null
   }
   & dotnet add $unitDir reference $appDir
+
+  Write-Host "Updating launch.json"
+  $text = @"
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+"@
+  for ($i = 1; $i -le [int]$dayShortName; $i++) {
+    $suffix = ""
+    if ($i -ne [int]$dayShortName) {
+        $suffix = ","
+    }
+
+    if ($i -lt 10) {
+      $launchName = "Day0$i"
+    }
+    else {
+      $launchName = "Day$i"
+    }
+    $text += @"
+        {
+            "name": "Launch $launchName.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "`${workspaceFolder}/artifacts/bin/$launchName.App/debug/$launchName.App.dll",
+            "args": [],
+            "cwd": "`${workspaceFolder}/src/$launchName/$launchName.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        }$suffix
+
+"@
+  }
+
+  $text += @"
+
+}
+"@
+  Set-Content (Join-Path $rootDir ".vscode/launch.json") $text
+
 }
 catch {
   Write-Host $_

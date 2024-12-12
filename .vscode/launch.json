@@ -3,7 +3,42 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [        {
+            "name": "Launch Day01.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day01.App/debug/Day01.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day01/Day01.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day02.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day02.App/debug/Day02.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day02/Day02.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day03.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day03.App/debug/Day03.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day03/Day03.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
         {
             "name": "Launch Day04.App",
             "type": "coreclr",
@@ -14,10 +49,19 @@
             "cwd": "${workspaceFolder}/src/Day04/Day04.App",
             "stopAtEntry": false,
             "console": "internalConsole",
-            "logging": {
-                "engineLogging": false
-            },
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day05.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day05.App/debug/Day05.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day05/Day05.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart"
         }
-    ]
+
 }
