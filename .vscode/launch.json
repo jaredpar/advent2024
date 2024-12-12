@@ -62,6 +62,18 @@
             "stopAtEntry": false,
             "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day06.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day06.App/debug/Day06.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day06/Day06.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         }
 
 }

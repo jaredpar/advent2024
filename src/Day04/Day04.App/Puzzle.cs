@@ -28,7 +28,7 @@ public sealed class Puzzle
     {
         var grid = Grid.Parse(input);
         var buffer = ArrayPool<char>.Shared.Rent(3);
-        using var e = grid.GetEnumerator();
+        var e = grid.GetEnumerator();
         var count = 0;
         while (e.MoveNext())
         {

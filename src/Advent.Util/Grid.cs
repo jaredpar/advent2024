@@ -184,11 +184,12 @@ public sealed class Grid<T>
         }
     }
 
-    public struct Enumerator(Grid<T> grid) : IDisposable
+    public struct Enumerator(Grid<T> grid)
     {
         public Grid<T> Grid { get; } = grid;
         public int Row { get; private set; } = -1;
         public int Column { get; private set; }
+        public GridPosition Position => new(Row, Column);
         public T Current => Grid.GetValue(Row, Column);
 
         public bool MoveNext()
