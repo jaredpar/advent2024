@@ -58,7 +58,7 @@ public enum GridDirection
     DiagonalLeftUp
 }
 
-public readonly struct GridPosition(int row, int column)
+public readonly record struct GridPosition(int row, int column)
 {
     public int Row { get; } = row;
     public int Column { get; } = column;
