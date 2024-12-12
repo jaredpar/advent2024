@@ -74,6 +74,18 @@
             "stopAtEntry": false,
             "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day07.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day07.App/debug/Day07.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day07/Day07.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         }
 
 }
