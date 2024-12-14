@@ -4,7 +4,7 @@ namespace Day08;
 
 public sealed class Puzzle
 {
-    public static int CountUniqueAntiNodes(string input)
+    public static int CountUniqueAntiNodes(string input, bool countAll = false)
     {
         var grid = Grid.Parse(input);
         var e1 = grid.GetEnumerator();
@@ -16,6 +16,7 @@ public sealed class Puzzle
                 continue;
             }
 
+            _ = set.Add(e1.Position);
             var e2 = grid.GetEnumerator();
             while (e2.MoveNext())
             {
@@ -25,7 +26,12 @@ public sealed class Puzzle
                 }
 
                 var diff = e1.Position - e2.Position;
-                Mark(e1.Position + diff);
+                var current = e1.Position;
+                do
+                {
+                    current += diff;
+                    Mark(current);
+                } while (countAll && grid.IsValid(current));
             }
         }
 
@@ -42,7 +48,5 @@ public sealed class Puzzle
                 }
             }
         }
-
     }
-
 }
