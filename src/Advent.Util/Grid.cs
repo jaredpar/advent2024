@@ -1,6 +1,10 @@
 ﻿using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
+using System.Text;
 
 namespace Advent.Util;
 
@@ -58,11 +62,8 @@ public enum GridDirection
     DiagonalLeftUp
 }
 
-public readonly record struct GridPosition(int row, int column)
+public readonly record struct GridPosition(int Row, int Column)
 {
-    public int Row { get; } = row;
-    public int Column { get; } = column;
-
     public GridPosition Move(GridDirection direction) =>
         direction switch 
         {
@@ -76,6 +77,23 @@ public readonly record struct GridPosition(int row, int column)
             GridDirection.DiagonalLeftUp => new(Row - 1, Column - 1),
             _ => throw new InvalidOperationException()
         };
+
+    public static GridPosition operator-(GridPosition position) =>
+        new(-position.Row, -position.Column);
+
+    public static GridPosition operator+(GridPosition left, (int Row, int Column) right) =>
+        left + new GridPosition(right.Row, right.Column);
+
+    public static GridPosition operator+(GridPosition left, GridPosition right) =>
+        new(left.Row + right.Row, left.Column + right.Column);
+
+    public static GridPosition operator-(GridPosition left, (int Row, int Column) right) =>
+        left - new GridPosition(right.Row, right.Column);
+
+    public static GridPosition operator-(GridPosition left, GridPosition right) =>
+        new(left.Row - right.Row, left.Column - right.Column);
+
+    public override string ToString() => $"R:{Row} C:{Column}";
 }
 
 public sealed class Grid<T>
@@ -212,6 +230,23 @@ public sealed class Grid<T>
         }
 
         public void Dispose() { }
+
+        public override string ToString() => $"R:{Row} C:{Column} V:{Current}";
+    }
+
+    public string RenderAsString()
+    {
+        var builder = new StringBuilder();
+        for (int r = 0; r < Rows; r++)
+        {
+            for (int c = 0; c < Columns; c++)
+            {
+                builder.Append(GetValue(r, c));
+            }
+            builder.AppendLine();
+        }
+
+        return builder.ToString();
     }
 }
 
