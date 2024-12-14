@@ -76,13 +76,7 @@ public sealed class Puzzle
 
     public static long Concat(long left, long right)
     {
-        var shift = (long)Math.Pow(10, CountDigits(right));
+        var shift = (long)Math.Pow(10, StandardUtil.CountDigits(right));
         return (left * shift) + right;
-
-        static long CountDigits(long number)
-        {
-            if (number == 0) return 1;
-            return (int)Math.Floor(Math.Log10(Math.Abs(number)) + 1);
-        }
     }
 }

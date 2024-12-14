@@ -122,6 +122,18 @@
             "stopAtEntry": false,
             "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day11.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day11.App/debug/Day11.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day11/Day11.App",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         }
 
 }
