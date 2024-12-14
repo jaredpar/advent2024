@@ -1,5 +1,10 @@
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Linq.Expressions;
 using System.Net.Quic;
+using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Text;
 using Advent.Util;
 using Entry = (int Id, int Count);
@@ -9,21 +14,22 @@ namespace Day09;
 public sealed class Puzzle
 {
     public const int FreeId = -1;
+    public const int ToDeletId = -1;
 
-    public static List<Entry> Parse(string input)
+    public static LinkedList<Entry> Parse(string input)
     {
-        var list = new List<Entry>(capacity: input.Length);
+        var list = new LinkedList<Entry>();
         int id = 0;
         int index = 0;
         while (index < input.Length)
         {
             var count = input[index] - '0';
-            list.Add((id, count));
+            list.AddLast((id, count));
             id++;
             if (index + 1 < input.Length)
             {
                 count = input[index + 1] - '0';
-                list.Add((FreeId, count));
+                list.AddLast((FreeId, count));
             }
 
             index += 2;
@@ -32,13 +38,13 @@ public sealed class Puzzle
         return list;
     }
 
-    public static string AsString(List<Entry> list)
+    public static string AsString(IEnumerable<Entry> list)
     {
         var builder = new StringBuilder();
-        var index = 0;
-        while (index < list.Count)
+        using var e = list.GetEnumerator();
+        while (e.MoveNext())
         {
-            var current = list[index];
+            var current = e.Current;
             while (current.Count > 0)
             {
                 if (current.Id == FreeId)
@@ -51,29 +57,29 @@ public sealed class Puzzle
                 }
                 current.Count--;
             }
-
-            index++;
         }
 
         return builder.ToString();
     }
 
-    public static long Checksum(List<Entry> list)
+    public static long Checksum(IEnumerable<Entry> list)
     {
         var realIndex = 0;
         var index = 0;
         var sum = 0L;
-        while (index < list.Count)
+        using var e = list.GetEnumerator();
+        while (e.MoveNext())
         {
-            var current = list[index];
-            while (current.Count > 0)
+            var current = e.Current;
+            var count = 0;
+            while (count < current.Count)
             {
                 if (current.Id != FreeId)
                 {
                     sum += (realIndex * current.Id);
                 }
                 realIndex++;
-                current.Count--;
+                count++;
             }
 
             index++;    
@@ -85,76 +91,330 @@ public sealed class Puzzle
     public static long ChecksumCompacted(string input)
     {
         var list = Parse(input);
-        var compacted = Compact(list);
-        return Checksum(compacted);
+        Compact(list);
+        return Checksum(list);
     }
 
-    public static List<Entry> Compact(List<Entry> list)
+    public static long ChecksumCompactedWhole(string input)
     {
-        var compacted = new List<Entry>(list.Count);
-        compacted.Add(list[0]);
+        var list = Parse(input);
+        CompactWholeSlow(list);
+        return Checksum(list);
+    }
 
-        var currentFree = list[1].Count;
-        var consumeIndex = list.Count - 1;
-        var currentConsume = list[consumeIndex];
-        var freeIndex = 1;
+    public static void Compact(LinkedList<Entry> list)
+    {
+        Debug.Assert(list.First is not null);
+        Debug.Assert(list.First.Next is not null);
+
+        var freeNode = list.First.Next;
+        var freeEntry = freeNode!.Value;
+        var consumeNode = list.Last;
+        if (consumeNode!.Value.Id == FreeId)
+        {
+            consumeNode = consumeNode.Previous!;
+        }
+        var consumeEntry = consumeNode.Value;
+        LinkedListNode<Entry>? last = null;
 
         do
         {
-            switch (currentFree - currentConsume.Count)
+            switch (freeEntry.Count  - consumeEntry.Count)
             {
                 case >0:
-                    compacted.Add(currentConsume);
-                    currentFree -= currentConsume.Count;
+                    list.AddBefore(freeNode, consumeEntry);
+                    freeEntry.Count -= consumeEntry.Count;
                     NextConsume();
                     break;
                 case 0:
-                    compacted.Add(currentConsume);
+                    list.AddBefore(freeNode, consumeEntry);
                     NextFree();
                     NextConsume();
                     break;
                 case <0:
-                    compacted.Add(new (currentConsume.Id, currentFree));
-                    currentConsume.Count -= currentFree;
+                    list.AddBefore(freeNode, new Entry(consumeEntry.Id, freeEntry.Count));
+                    consumeEntry.Count -= freeEntry.Count;
                     NextFree();
                     break;
             }
-        } while (freeIndex < consumeIndex);
+        } while (last is null);
 
-        return compacted;
+        while (last.Next is not null)
+        {
+            list.Remove(last.Next);
+        }
 
         void NextFree()
         {
-            if (freeIndex + 1 == consumeIndex)
+            if (object.ReferenceEquals(freeNode.Next, consumeNode))
             {
-                if (currentConsume.Count > 0)
+                if (consumeEntry.Count > 0)
                 {
-                    compacted.Add(currentConsume);
+                    last = list.AddBefore(freeNode, consumeEntry);
                 }
-                freeIndex = consumeIndex;
+                else
+                {
+                    last = freeNode.Previous!;
+                }
+
+                Debug.Assert(last is not null);
             }
             else
             {
-                compacted.Add(list[freeIndex + 1]);
-                freeIndex += 2;
-                if (freeIndex < list.Count) 
-                {
-                    currentFree = list[freeIndex].Count;
-                }
+                Debug.Assert(freeNode.Next is not null);
+                Debug.Assert(freeNode.Next.Next is not null);
+
+                var temp = freeNode;
+                freeNode = freeNode.Next.Next;
+                freeEntry = freeNode.Value;
+                list.Remove(temp);
             }
         }
 
         void NextConsume()
         {
-            consumeIndex -= 2;
-            if (consumeIndex >= 0)
+            if (object.ReferenceEquals(consumeNode.Previous, freeNode))
             {
-                currentConsume = list[consumeIndex];
+                last = freeNode.Previous;
             }
             else
             {
-                currentConsume = default;
+                Debug.Assert(consumeNode.Previous is not null);
+                Debug.Assert(consumeNode.Previous.Previous is not null);
+                consumeNode = consumeNode.Previous.Previous;
+                consumeEntry = consumeNode.Value;
             }
         }
-    }   
+    }
+
+    public static void CompactWhole(LinkedList<Entry> list)
+    {
+        var freeArray = BuildFreeArray();
+        var currentNode = list.Last;
+        var currentIndex = list.Count - 1;
+
+        if (currentNode!.Value.Id == FreeId)
+        {
+            Previous();
+        }
+
+        while (currentNode is not null)
+        {
+            if (currentNode.Value.Id != FreeId)
+            {
+                var node = FindInsertAfter(currentNode.Value, currentIndex);
+                if (node is not null)
+                {
+                    list.AddAfter(node, currentNode.Value);
+                    currentNode.ValueRef.Id = FreeId;
+                }
+            }
+
+            currentNode = currentNode.Previous;
+            currentIndex--;
+        }
+
+        CompactFreeEnd();
+
+        // Compat all the free nodes at the end of the list
+        void CompactFreeEnd()
+        {
+            var node = list.Last;
+            while (
+                node is { Value: { Id: FreeId } } &&
+                node.Previous is { Value: { Id: FreeId } } previous)
+            {
+                previous.ValueRef.Count += node.Value.Count;
+                list.Remove(node);
+                node = previous;
+            }
+        }
+
+        void Previous()
+        {
+            if (currentNode is not null)
+            {
+                currentNode = currentNode.Previous;
+                currentIndex--;
+            }
+        }
+
+        LinkedListNode<Entry>? FindInsertAfter(Entry entry, int entryIndex)
+        {
+            (int FreeIndex, int ListIndex)? tuple = null;
+
+            for (int i = entry.Count; i < freeArray.Length; i++)
+            {
+                if (freeArray[i] is { Node : { } } element)
+                {
+                    if (element.ListIndex > entryIndex)
+                    {
+                        freeArray[i] = (null, -1, true);
+                        continue;
+                    }
+
+                    if (tuple is not { } t ||
+                        element.ListIndex < t.ListIndex)
+                    {
+                        tuple = (i, element.ListIndex);
+                    }
+                }
+            }
+
+            if (tuple is { } found)
+            {
+                var node = freeArray[found.FreeIndex].Node!.Previous;
+                AllocateFreeNode(found.FreeIndex, entry.Count);
+                return node;
+            }
+
+            return null;
+        }
+
+        void AllocateFreeNode(int freeArrayIndex, int allocated)
+        {
+            var (freeNode, freeListIndex, _) = freeArray[freeArrayIndex];
+            Debug.Assert(freeNode is not null);
+            Debug.Assert(freeListIndex >= 0);
+
+            // First lets find the next node with the same count
+            var node = freeNode.Next;
+            var index = freeListIndex + 1;
+            while (node is not null)
+            {
+                if (index >= currentIndex)
+                {
+                    node = null;
+                    break;
+                }
+
+                if (node.Value.Id == FreeId && node.Value.Count == freeArrayIndex)
+                {
+                    freeArray[freeArrayIndex] = (node, index, false);
+                    break;
+                }
+
+                node = node.Next;
+                index++;
+            }
+
+            if (node is null)
+            {
+                freeArray[freeArrayIndex] = (null, -1, true);
+            }
+
+            // Next let's see if this node needs to be slotted into the free
+            // list. The new count could position it before an exisiting node
+            // in the list.
+            var rest = freeNode.ValueRef.Count -= allocated;
+            if (rest == 0)
+            {
+                list.Remove(freeNode);
+            }
+            else if (
+                freeArray[rest] is { Node : { } } element &&
+                freeListIndex < element.ListIndex)
+            {
+                freeArray[rest] = (freeNode, freeListIndex, false);
+            }
+        }
+
+        (LinkedListNode<Entry>? Node, int ListIndex, bool Done)[] BuildFreeArray()
+        {
+            var maxFree = GetMaxFree();
+            var array = new (LinkedListNode<Entry>? Node, int Index, bool Done)[maxFree + 1];
+            var node = list.First;
+            var index = 0;
+            var found = 0;
+            while (node is not null && found < maxFree)
+            {
+                if (node.Value.Id == FreeId)
+                {
+                    var count = node.Value.Count;
+                    ref var elem = ref array[count];
+                    if (elem.Node is null)
+                    {
+                        elem.Node = node;
+                        elem.Index = index;
+                        found++;;
+                    }
+                }
+                node = node.Next;
+                index++;
+            }
+
+            return array;
+
+            int GetMaxFree()
+            {
+                using var e = list.GetEnumerator();
+                var max = 1;
+                while (e.MoveNext())
+                {
+                    if (e.Current.Id == FreeId && e.Current.Count > max)
+                    {
+                        max = e.Current.Count;
+                    }
+                }
+
+                return max;
+            }
+        }
+    }
+
+    public static IEnumerable<LinkedListNode<Entry>> FreeEnumeratorForward(LinkedList<Entry> list, LinkedListNode<Entry> limitNode)
+    {
+        var node = list.First;
+        while (node is not null && !object.ReferenceEquals(limitNode, node))
+        {
+            if (node.Value.Id == FreeId)
+            {
+                yield return node;
+            }
+            node = node.Next;
+        }
+    }
+
+    public static IEnumerable<LinkedListNode<Entry>> FileEnumeratorReverse(LinkedList<Entry> list)
+    {
+        var node = list.Last;
+        while (node is not null)
+        {
+            if (node.Value.Id != FreeId)
+            {
+                yield return node;
+            }
+            node = node.Previous;
+        }
+    }
+
+    public static void CompactWholeSlow(LinkedList<Entry> list)
+    {
+        foreach (var fileNode in FileEnumeratorReverse(list))
+        {
+            ref var fileValue = ref fileNode.ValueRef;
+            foreach (var freeNode in FreeEnumeratorForward(list, fileNode))
+            {
+                if (object.ReferenceEquals(freeNode, fileNode))
+                {
+                    break;
+                }
+
+                ref var freeValue = ref freeNode.ValueRef;
+                if (freeValue.Count == fileValue.Count)
+                {
+                    freeValue.Id = fileValue.Id;
+                    fileValue.Id = FreeId;
+                    break;
+                }
+                else if (freeValue.Count > fileValue.Count)
+                {
+                    list.AddBefore(freeNode, fileValue);
+                    freeValue.Count -= fileValue.Count;
+                    fileValue.Id = FreeId;
+                    break;
+                }
+            }
+        }
+    }
 }
