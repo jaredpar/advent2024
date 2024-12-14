@@ -1,7 +1,11 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Advent.Util;
+using Microsoft.VisualBasic;
 
 namespace Day11;
 
@@ -85,6 +89,64 @@ public static class Puzzle
             }
 
             node = node.Next;
+        }
+
+    }
+
+    public static long RunNew(string input, int count)
+    {
+        var list = Parse(input);
+        var map = CreateMap(list);
+        var newMap = new Dictionary<long, long>();
+        for (int i = 0; i < count; i++)
+        {
+            newMap.Clear();
+            foreach (var kvp in map)
+            {
+                var stone = kvp.Key;
+                if (stone == 0)
+                {
+                    IncrementMap(newMap, 1, kvp.Value);
+                }
+                else if (
+                    StandardUtil.CountDigits(stone) is { } digits &&
+                    digits % 2 == 0)
+                {
+                    var mod = (long)Math.Pow(10, digits / 2);
+                    var rightValue = stone % mod;
+                    var leftValue = (stone - rightValue) / mod;
+                    IncrementMap(newMap, leftValue, kvp.Value);
+                    IncrementMap(newMap, rightValue, kvp.Value);
+                }
+                else
+                {
+                    IncrementMap(newMap, stone * 2024, kvp.Value);
+                }
+            }
+
+            var temp = map;
+            map = newMap;
+            newMap = temp;
+            newMap.Clear();
+        }
+
+        return map.Sum(x => x.Value);
+
+        static Dictionary<long, long> CreateMap(LinkedList<long> list)
+        {
+            var map = new Dictionary<long, long>();
+            foreach (var value in list)
+            {
+                IncrementMap(map, value, 1);
+            }
+
+            return map;
+        }
+
+        static void IncrementMap(Dictionary<long, long> map, long key, long increment)
+        {
+            ref var value = ref CollectionsMarshal.GetValueRefOrAddDefault(map, key, out _);
+            value += increment;
         }
     }
 }

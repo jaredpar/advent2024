@@ -25,9 +25,10 @@ public class PuzzleTests
     [InlineData("125 17", 6, 22)]
     [InlineData("125 17", 25, 55312)]
     [InlineData(Input.Real, 25, 193899)]
-    public void Part1(string input, int count, int expected)
+    [InlineData(Input.Real, 75, 229682160383225)]
+    public void Parts(string input, int count, long expected)
     {
-        var actual = Puzzle.Blink(input, count);
+        var actual = Puzzle.RunNew(input, count);
         Assert.Equal(expected, actual);
     }
 }
