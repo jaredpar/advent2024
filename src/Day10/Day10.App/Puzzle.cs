@@ -45,4 +45,45 @@ public sealed class Puzzle
             }
         }
     }
+
+    public static int Rate(string input)
+    {
+        var map = Grid.ParseInts(input);
+        var data = new Grid<int>(map.Rows, map.Columns);
+
+        var e = map.GetEnumerator();
+        while (e.MoveNext())
+        {
+            if (e.Current == 9)
+            {
+                TraceDown(9, e.Position);
+            }
+        }
+
+        e = map.GetEnumerator();
+        var sum = 0;
+        while (e.MoveNext())
+        {
+            if (e.Current == 0)
+            {
+                sum += data[e.Position];
+            }
+        }
+
+        return sum;
+
+        void TraceDown(int expected, GridPosition position)
+        {
+            if (!map.IsValid(position) || map[position] != expected)
+            {
+                return;
+            }
+
+            data[position]++;
+            foreach (var dir in Grid.StraightDirections)
+            {
+                TraceDown(expected - 1, position.Move(dir));
+            }
+        }
+    }
 }

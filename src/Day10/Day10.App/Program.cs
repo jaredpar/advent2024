@@ -5,3 +5,5 @@ Console.WriteLine("Hello, World!");
 
 Console.WriteLine(Puzzle.Score(Input.Test));
 Console.WriteLine(Puzzle.Score(Input.Real));
+Console.WriteLine(Puzzle.Rate(Input.Test));
+Console.WriteLine(Puzzle.Rate(Input.Real));

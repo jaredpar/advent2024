@@ -11,4 +11,10 @@ public class PuzzleTests
         Assert.Equal(667, Puzzle.Score(Input.Real));
     }
 
+    [Fact]
+    public void Part2()
+    {
+        Assert.Equal(81, Puzzle.Score(Input.Test));
+        Assert.Equal(1344, Puzzle.Score(Input.Real));
+    }
 }
