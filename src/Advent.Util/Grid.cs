@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Immutable;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Numerics;
@@ -105,6 +106,9 @@ public sealed class Grid<T>
 
     public int Rows => _items.Length / _columns;
     public int Columns => _columns;
+
+    public ref T this[GridPosition position] => ref GetValue(position);
+    public ref T this[int row, int column] => ref GetValue(row, column);
 
     public Grid(int rows, int columns)
     {
@@ -252,26 +256,37 @@ public sealed class Grid<T>
 
 public static class Grid
 {
-    public static Grid<char> Parse(string[] lines)
-    {
-        var grid = new Grid<char>(lines.Length, lines[0].Length);
-        for (int r = 0; r < lines.Length; r++)
-        {
-            var line = lines[r];
-            for (int c = 0; c < line.Length; c++)
-            {
-                grid.GetValue(r, c) = line[c];
-            }
-        }
+    public static Grid<char> Parse(string input) =>
+        Parse(input, static c => c);
 
-        return grid;
-    }
+    public static Grid<int> ParseInts(string input) =>
+        Parse(input, static c => c - '0');
+
+    public static ImmutableArray<GridDirection> StraightDirections { get; } =
+    [
+        GridDirection.Right,
+        GridDirection.Down,
+        GridDirection.Left,
+        GridDirection.Up
+    ];
+
+    public static ImmutableArray<GridDirection> AllDirections { get; } =
+    [
+        GridDirection.Right,
+        GridDirection.Down,
+        GridDirection.Left,
+        GridDirection.Up,
+        GridDirection.DiagonalRightDown,
+        GridDirection.DiagonalLeftDown,
+        GridDirection.DiagonalRightUp,
+        GridDirection.DiagonalLeftUp
+    ];
 
     /// <summary>
     /// Parse out the input by lines with each character being an element in the 
     /// <see cref="Grid<char>"/> 
     /// </summary>
-    public static Grid<char> Parse(string input)
+    public static Grid<T> Parse<T>(string input, Func<char, T> func)
     {
         var e = input.SplitLines();
         if (!e.MoveNext())
@@ -281,14 +296,14 @@ public static class Grid
 
         var rows = input.CountLines();
         var columns = e.Current.Length;
-        var grid = new Grid<char>(rows, columns);
+        var grid = new Grid<T>(rows, columns);
         var r = 0;
         do
         {
             var current = e.Current;
             for (int c = 0; c < current.Length; c++)
             {
-                grid.GetValue(r, c) = current[c];
+                grid.GetValue(r, c) = func(current[c]);
             }
             r++;
         } while (e.MoveNext());
