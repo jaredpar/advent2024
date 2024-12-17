@@ -168,6 +168,18 @@
             "args": [],
             "cwd": "${workspaceFolder}/src/Day14/Day14.App",
             "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day15.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day15.App/debug/Day15.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day15/Day15.App",
+            "stopAtEntry": false,
             "console": "integratedTerminal",
             "internalConsoleOptions": "openOnSessionStart"
         }
