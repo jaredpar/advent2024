@@ -59,6 +59,35 @@ public static class Puzzle
         }
     }
 
+    public static int SecondsTillEasterEgg(string input, int rows, int columns)
+    {
+        var robots = Parse(input);
+        var seconds = 0;
+        var set = new HashSet<GridPosition>();
+        while (true)
+        {
+            Execute(robots, rows, columns);
+            seconds++;
+
+            var overlap = false;
+            set.Clear();
+            foreach (var robot in robots)
+            {
+                if (!set.Add(robot.Position))
+                {
+                    overlap = true;
+                    break;
+                }
+            }
+
+            if (!overlap)
+            {
+                // Second time there was a Christmas tree
+                Console.WriteLine(RenderAsString(robots, rows, columns));
+            }
+        }
+    }
+
     public static string RenderAsString(Robot[] robots, int rows, int columns)
     {
         var grid = new Grid<int>(rows, columns);
@@ -80,7 +109,7 @@ public static class Puzzle
         });
     }
 
-    public static void Execute(Robot[] robots, int rows, int columns, int times)
+    public static void Execute(Robot[] robots, int rows, int columns, int times = 1)
     {
         for (int i = 0; i < robots.Length; i++)
         {
