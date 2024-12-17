@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using Advent.Util;
 
@@ -6,7 +7,7 @@ namespace Day12;
 
 public static class Puzzle
 {
-    public static int GetPrice(string input)
+    public static int GetRegions(string input, Func<Grid<char>, Span<GridPosition>, int> func)
     {
         var grid = Grid.Parse(input);
         var visited = new HashSet<GridPosition>();
@@ -21,9 +22,8 @@ public static class Puzzle
             }
 
             var region = GetRegion(current);
-            var perimiter = GetPerimiter(grid, CollectionsMarshal.AsSpan(region));
-            var price = region.Count * perimiter;
-            total += price;
+            var result = func(grid, CollectionsMarshal.AsSpan(region));
+            total += result;
         }
 
         return total;
@@ -59,6 +59,17 @@ public static class Puzzle
                     toVisit.Enqueue(pos.Move(dir));
                 }
             }
+        }
+    }
+
+    public static int GetPrice(string input)
+    {
+        return GetRegions(input, GetReginPrice);
+
+        static int GetReginPrice(Grid<char> grid, Span<GridPosition> region)
+        {
+            var perimeter = GetPerimiter(grid, region);
+            return perimeter * region.Length;
         }
     }
 
