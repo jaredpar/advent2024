@@ -2,6 +2,7 @@
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
+using System.IO.Pipelines;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
@@ -78,6 +79,16 @@ public readonly record struct GridPosition(int Row, int Column)
             GridDirection.DiagonalLeftUp => new(Row - 1, Column - 1),
             _ => throw new InvalidOperationException()
         };
+
+    public GridPosition Move(params ReadOnlySpan<GridDirection> directions)
+    {
+        var position = this;
+        foreach (var dir in directions)
+        {
+            position = position.Move(dir);
+        }
+        return position;
+    }
 
     public static GridPosition operator-(GridPosition position) =>
         new(-position.Row, -position.Column);

@@ -11,6 +11,16 @@ public static class StandardUtil
         }
     }
 
+    public static Exception InvalidValue()
+    {
+        return new InvalidOperationException($"Invalid value");
+    }
+
+    public static Exception InvalidValue<T>(T value)
+    {
+        return new InvalidOperationException($"Invalid value: {value}");
+    }
+
     public static long CountDigits(long number)
     {
         if (number == 0) return 1;
