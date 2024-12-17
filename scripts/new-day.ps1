@@ -51,7 +51,7 @@ using Advent.Util;
 
 namespace $dayName;
 
-public sealed class Puzzle
+public static class Puzzle
 {
 
 }
