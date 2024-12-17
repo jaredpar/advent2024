@@ -19,7 +19,7 @@ public readonly struct GridSpan<T>
     public Memory<T> Memory => Grid.GetRowMemory(Row).Slice(Column, Length);
     public Span<T> Span => Grid.GetRowSpan(Row).Slice(Column, Length);
 
-    public ref T this[int index] => ref Grid.GetValue(Row, Column + index);
+    public ref T this[int index] => ref Grid[Row, Column + index];
 
     public GridSpan(Grid<T> grid, int row, int column, int length)
     {
@@ -107,8 +107,8 @@ public sealed class Grid<T>
     public int Rows => _items.Length / _columns;
     public int Columns => _columns;
 
-    public ref T this[GridPosition position] => ref GetValue(position);
-    public ref T this[int row, int column] => ref GetValue(row, column);
+    public ref T this[GridPosition position] => ref this[position.Row, position.Column];
+    public ref T this[int row, int column] => ref _items[(row * _columns) + column];
 
     public Grid(int rows, int columns)
     {
@@ -156,10 +156,6 @@ public sealed class Grid<T>
             yield return (row, column + 1);
     }
 
-    public ref T GetValue(GridPosition position) => ref GetValue(position.Row, position.Column);
-
-    public ref T GetValue(int row, int column) => ref _items[(row * _columns) + column];
-
     public Memory<T> GetRowMemory(int row) => _items.AsMemory(row * _columns, _columns);
 
     public Span<T> GetRowSpan(int row) => _items.AsSpan(row * _columns, _columns);
@@ -180,7 +176,7 @@ public sealed class Grid<T>
                 return false;
             }
 
-            span[i] = GetValue(position);
+            span[i] = this[position];
             position = position.Move(direction);
         };
 
@@ -195,24 +191,13 @@ public sealed class Grid<T>
         }
     }
 
-    public IEnumerable<(T, int row, int column)> GetValues()
-    {
-        for (int r = 0; r < Rows; r++)
-        {
-            for (int c = 0; c < Columns; c++)
-            {
-                yield return (GetValue(r, c), r, c);
-            }
-        }
-    }
-
     public struct Enumerator(Grid<T> grid)
     {
         public Grid<T> Grid { get; } = grid;
         public int Row { get; private set; } = -1;
         public int Column { get; private set; }
         public GridPosition Position => new(Row, Column);
-        public T Current => Grid.GetValue(Row, Column);
+        public T Current => Grid[Row, Column];
 
         public bool MoveNext()
         {
@@ -238,14 +223,15 @@ public sealed class Grid<T>
         public override string ToString() => $"R:{Row} C:{Column} V:{Current}";
     }
 
-    public string RenderAsString()
+    public string RenderAsString(Action<StringBuilder, T>? appendFunc = null)
     {
+        appendFunc ??= (b, c) => b.Append(c);
         var builder = new StringBuilder();
         for (int r = 0; r < Rows; r++)
         {
             for (int c = 0; c < Columns; c++)
             {
-                builder.Append(GetValue(r, c));
+                appendFunc(builder, this[r, c]);
             }
             builder.AppendLine();
         }
@@ -303,7 +289,7 @@ public static class Grid
             var current = e.Current;
             for (int c = 0; c < current.Length; c++)
             {
-                grid.GetValue(r, c) = func(current[c]);
+                grid[r, c] = func(current[c]);
             }
             r++;
         } while (e.MoveNext());
@@ -339,7 +325,7 @@ public static class Grid
 
             for (int c = 0; c < grid.Columns; c++)
             {
-                grid.GetValue(r, c) = func(current[rangeSpan[c]]);
+                grid[r, c] = func(current[rangeSpan[c]]);
             }
 
             r++;
@@ -361,4 +347,7 @@ public static class Grid
             return count;
         }
     }
+
+    public static string RenderAsString(this Grid<char> grid) =>
+        grid.RenderAsString(static (b, c) => b.Append(c));
 }

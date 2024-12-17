@@ -42,9 +42,9 @@ public static class Puzzle
         while (e.MoveNext())
         {
             var buttonA = ParseButton(e.Current);
-            Require(e.MoveNext());
+            StandardUtil.Require(e.MoveNext());
             var buttonB = ParseButton(e.Current);
-            Require(e.MoveNext());
+            StandardUtil.Require(e.MoveNext());
             var goal = ParseGoal(e.Current);
             list.Add(new (buttonA, buttonB, goal));
 
@@ -54,7 +54,7 @@ public static class Puzzle
             }
             else
             {
-                Require(e.Current.IsEmpty);
+                StandardUtil.Require(e.Current.IsEmpty);
             }
         }
 
@@ -62,47 +62,16 @@ public static class Puzzle
 
         static Movement ParseButton(ReadOnlySpan<char> line)
         {
-            var x = ParseCore(ref line, '+', ',');
-            var y = ParseCore(ref line, '+', null);
+            var x = StandardUtil.ParseInt(ref line, '+', ',');
+            var y = StandardUtil.ParseInt(ref line, '+', null);
             return (x, y);
         }
 
         static Movement ParseGoal(ReadOnlySpan<char> line)
         {
-            var x = ParseCore(ref line, '=', ',');
-            var y = ParseCore(ref line, '=', null);
+            var x = StandardUtil.ParseInt(ref line, '=', ',');
+            var y = StandardUtil.ParseInt(ref line, '=', null);
             return (x, y);
-        }
-
-        static int ParseCore(ref ReadOnlySpan<char> line, char start, char? end)
-        {
-            var index = line.IndexOf(start);
-            Require(index > 0);
-            line = line[(index + 1)..];
-
-            int value;
-            if (end is { } c)
-            {
-                index = line.IndexOf(c);
-                Require(index > 0);
-                value = int.Parse(line[..index]);
-                line = line[(index + 1)..];
-            }
-            else
-            {
-                value = int.Parse(line);
-                line = ReadOnlySpan<char>.Empty;
-            }
-
-            return value;
-        }
-
-        static void Require(bool b)
-        {
-            if (!b)
-            {
-                throw new InvalidOperationException();
-            }
         }
     }
 

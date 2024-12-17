@@ -23,13 +23,13 @@ public sealed class Puzzle
                 return count;
             }
 
-            ref var value = ref grid.GetValue(next);
+            ref var value = ref grid[next];
             if (value == '.' || value == 'X')
             {
                 if (value == '.')
                     count++;
                 value = '^';
-                grid.GetValue(guardPosition) = 'X';
+                grid[guardPosition] = 'X';
                 guardPosition = next;
             }
             else if (value == '#')
@@ -49,7 +49,7 @@ public sealed class Puzzle
         var count = 0;
         while (e.MoveNext())
         {
-            ref var value = ref grid.GetValue(e.Position);
+            ref var value = ref grid[e.Position];
             if (value == '^' || value == '#')
             {
                 continue;
@@ -82,7 +82,7 @@ public sealed class Puzzle
                     return false;
                 }
 
-                if (grid.GetValue(next) == '#')
+                if (grid[next] == '#')
                 {
                     direction = Rotate(direction);
                     dirFlag = GetFlag(direction);

@@ -158,6 +158,18 @@
             "stopAtEntry": false,
             "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Day14.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/artifacts/bin/Day14.App/debug/Day14.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Day14/Day14.App",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "openOnSessionStart"
         }
 
 }

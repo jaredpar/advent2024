@@ -19,7 +19,7 @@ public sealed class GridTests
         {
             for (int c = 0; c < grid.Columns; c++)
             {
-                Assert.Equal(expected[current], grid.GetValue(r, c));
+                Assert.Equal(expected[current], grid[r, c]);
                 current ++;
             }
         }

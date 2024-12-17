@@ -41,7 +41,7 @@ public sealed class Puzzle
         {
             if (grid.IsValid(position))
             {
-                var value  = grid.GetValue(position);
+                var value  = grid[position];
                 if (value != '#')
                 {
                     _ = set.Add(position);
