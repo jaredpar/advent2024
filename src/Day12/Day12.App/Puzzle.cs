@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Transactions;
 using Advent.Util;
 
 namespace Day12;
@@ -70,6 +71,53 @@ public static class Puzzle
         {
             var perimeter = GetPerimiter(grid, region);
             return perimeter * region.Length;
+        }
+    }
+
+    public static int GetBulkPrice(string input)
+    {
+        return GetRegions(input, GetBulkRegionPrice);
+
+        static int GetBulkRegionPrice(Grid<char> grid, Span<GridPosition> region)
+        {
+            Debug.Assert(region.Length > 0);
+            var c = grid[region[0]];
+            var perimeter = 0;
+            perimeter += GetBulkPerimiter(grid, c, region, GridDirection.Up, GridDirection.Left);
+            perimeter += GetBulkPerimiter(grid, c, region, GridDirection.Right, GridDirection.Up);
+            perimeter += GetBulkPerimiter(grid, c, region, GridDirection.Down, GridDirection.Left);
+            perimeter += GetBulkPerimiter(grid, c, region, GridDirection.Left, GridDirection.Up);
+
+            return region.Length * perimeter;
+        }
+
+        static int GetBulkPerimiter(Grid<char> grid, char c, Span<GridPosition> region, GridDirection dir, GridDirection normalizeDir)
+        {
+            var count = 0;
+            foreach (var position in region)
+            {
+                if (HasFence(position, dir))
+                {
+                    var next = position.Move(normalizeDir);
+                    if (!grid.IsValid(next) ||
+                        grid[next] != c ||
+                        !HasFence(next, dir))
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+
+            bool HasFence(GridPosition position, GridDirection dir)
+            {
+                Debug.Assert(grid.IsValid(position));
+                Debug.Assert(grid[position] == c);
+
+                var next = position.Move(dir);
+                return !grid.IsValid(next) || grid[next] != c;
+            }
         }
     }
 
