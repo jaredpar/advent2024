@@ -1,59 +1,35 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Advent.Util;
-
-using Movement = (int X, int Y);
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Complex;
+using Movement = (long X, long Y);
 
 namespace Day13;
 
-public class Machine(Movement buttonA, Movement buttonB, Movement goal)
+public sealed class Machine(Movement buttonA, Movement buttonB, Movement goal)
 {
     public Movement ButtonA { get; } = buttonA;
     public Movement ButtonB { get; } = buttonB;
     public Movement Goal { get; } = goal;
 
-    public int? Solve()
+    public long? Solve() => Solve(ButtonA, ButtonB, Goal);
+    public long? SolveHard() => Solve(ButtonA, ButtonB, (Goal.X + 10000000000000, Goal.Y + 10000000000000));
+
+    private static long? Solve(Movement buttonA, Movement buttonB, Movement goal)
     {
-        var aCount = 0;
+        var det = (buttonA.X * buttonB.Y) - (buttonA.Y * buttonB.X);
+        var aCount = ((goal.X * buttonB.Y) - (goal.Y * buttonB.X)) / det;
+        var bCount = ((buttonA.X * goal.Y) - (buttonA.Y * goal.X)) / det;
 
-        while (true)
+        if ((aCount * buttonA.X) + (bCount * buttonB.X) == goal.X &&
+            (aCount * buttonA.Y) + (bCount * buttonB.Y) == goal.Y)
         {
-            if (CanBSolve())
-            {
-                var bCount = (Goal.X - GetX()) / ButtonB.X;
-                return (aCount * 3) + bCount;
-            }
-            else
-            {
-                aCount++;
-                var x = GetX();
-                var y = GetY();
-                if (x == Goal.X && y == Goal.Y)
-                {
-                    return aCount * 3;
-                }
-
-                if (x > Goal.X || y > Goal.Y)
-                {
-                    return null;
-                }
-            }
+            return (aCount * 3) + bCount;
         }
 
-        int GetX() => aCount * ButtonA.X;
-        int GetY() => aCount * ButtonA.Y;
-        bool CanBSolve()
-        {
-            var x = GetX();
-            var xDelta = Goal.X - x;
-            if (xDelta % ButtonB.X == 0)
-            {
-                var count = xDelta / ButtonB.X;
-                var y = GetY();
-                return y + (count * ButtonB.Y) == Goal.Y;
-            }
-            return false;
-        }
+        return null;
     }
 }
 
@@ -130,13 +106,13 @@ public static class Puzzle
         }
     }
 
-    public static int GetTotal(string input)
+    public static long GetTotal(string input, bool hard = false)
     {
         var machines = ParseMachines(input);
-        var total = 0;
+        var total = 0L;
         foreach (var machine in machines)
         {
-            var result = machine.Solve();
+            var result = hard ? machine.SolveHard() : machine.Solve();
             if (result is { } r)
             {
                 total += r;

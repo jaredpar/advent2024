@@ -1,8 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Day13;
 
-Console.WriteLine(Puzzle.GetTotal(Input.Test));
-Console.WriteLine(Puzzle.GetTotal(Input.Real));
+Console.WriteLine(Puzzle.GetTotal(Input.Test, hard: false));
+Console.WriteLine(Puzzle.GetTotal(Input.Real, hard: false));
+Console.WriteLine(Puzzle.GetTotal(Input.Test, hard: true));
+Console.WriteLine(Puzzle.GetTotal(Input.Real, hard: true));
 
 
 /*
