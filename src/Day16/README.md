@@ -2,4 +2,3 @@
 
 Solution for [Day 16](https://adventofcode.com/2024/day/16)
 
-Wrong guess part1 134596
