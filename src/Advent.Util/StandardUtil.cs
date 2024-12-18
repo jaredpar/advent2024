@@ -1,9 +1,11 @@
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Advent.Util;
 
 public static class StandardUtil
 {
-    public static void Require(bool condition)
+    public static void Require([DoesNotReturnIf(false)] bool condition)
     {
         if (!condition)
         {
